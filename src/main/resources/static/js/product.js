@@ -83,41 +83,53 @@ $(document).ready(function() {
                     resetPopup();
                 });
 
-                // 아니요 버튼 클릭 시
-                confirmNo.off('click').on('click', function () {
-                    confirmYes.hide();
-                    confirmNo.hide();
-                    selectionButtons.show();
-                    selectionButtons.empty();
+                        // 아니요 버튼 클릭 시
+                        confirmNo.off('click').on('click', function () {
+                            confirmYes.hide();
+                            confirmNo.hide();
+                            selectionButtons.show();
+                            selectionButtons.empty();
 
+                            const token = localStorage.getItem('accessToken');
+                            if (!token) {
+                                alert('로그인이 필요합니다.');
+                                return;
+                            }
 
-                    // DB에서 제품명 목록을 가져와 버튼 생성
-                    $.getJSON('/api/getAllItems', function (items) {
-                        items.forEach(function (item) {
-                            const button = $(`<button>${item.iname}</button>`);
-                            button.click(function () {
-                                fetchAndDisplayItem(item.iname, imageUrl);
-                                resetPopup();
+                            // 제품 목록 가져오기
+                            $.ajax({
+                                url: '/api/getAllItems',
+                                type: 'GET',
+                                headers: {
+                                    'Authorization': 'Bearer ' + token
+                                },
+                                success: function(items) {
+                                    items.forEach(function(item) {
+                                        const button = $(`<button>${item.iname}</button>`);
+                                        button.click(function() {
+                                            fetchAndDisplayItem(item.iname, imageUrl);
+                                            resetPopup();
+                                        });
+                                        selectionButtons.append(button);
+                                    });
+                                },
+                                error: function() {
+                                    alert('제품 목록을 불러오는 중 오류가 발생했습니다.');
+                                }
                             });
-                            selectionButtons.append(button);
                         });
-                    }).fail(function () {
-                        alert('제품 목록을 불러오는 중 오류가 발생했습니다.');
-                    });
-                });
-                        // 쿠키에 이미지 URL 저장
-
                     },
                     error: function() {
                         alert('이미지 업로드 실패');
                     }
                 });
             },
-            error: function () {
+            error: function() {
                 popupMessage.text('이미지 분류 중 오류가 발생했습니다.');
             }
         });
     });
+
 
     // DB에서 데이터를 가져와 화면에 표시하는 함수
     function fetchAndDisplayItem(iname, imageUrl) {

@@ -91,6 +91,12 @@ public class MypageController {
         // 현재 로그인된 사용자 정보 가져오기
         String email = ((User) authentication.getPrincipal()).getUsername();
 
+        // 인증이 되어 있지 않거나 null인 경우 처리
+        if (authentication == null || !authentication.isAuthenticated()) {
+            // 인증되지 않은 사용자는 로그인 페이지로 리다이렉트
+            return "redirect:/echopickup/member/login";
+        }
+
         try {
             // 사용자 정보 가져오기
             Member member = memberService2.getMemberByEmail(email)
